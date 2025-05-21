@@ -1,3 +1,6 @@
+import { fromByteArray, toByteArray } from './mb64/encoding';
+
+
 export const protocols = ["webtty"];
 
 export const msgInputUnknown = '0';
@@ -126,6 +129,8 @@ export class WebTTY {
      */
     bufSize: number;
 
+    mb64BaseChars: string;
+
     constructor(term: Terminal, connectionFactory: ConnectionFactory, args: string, authToken: string) {
         this.term = term;
         this.connectionFactory = connectionFactory;
@@ -170,7 +175,7 @@ export class WebTTY {
                 const payload = data.slice(1);
                 switch (data[0]) {
                     case msgOutput:
-                        this.term.output(Uint8Array.from(atob(payload), c => c.charCodeAt(0)));
+                        this.term.output(toByteArray(payload));
                         break;
                     case msgPong:
                         break;
@@ -244,7 +249,7 @@ export class WebTTY {
 
         for (let i = 0; i < Math.ceil(dataString.length / maxChunkSize); i++) {
             let inputChunk = dataString.substring(i * maxChunkSize, Math.min((i + 1) * maxChunkSize, dataString.length))
-            this.connection.send(msgInput + btoa(inputChunk));
+            this.connection.send(msgInput + fromByteArray(new TextEncoder().encode(inputChunk)));
         }
     }
 

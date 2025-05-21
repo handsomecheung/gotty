@@ -3,10 +3,11 @@ package webtty
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"io"
 	"sync"
 	"testing"
+
+	"github.com/sorenisanerd/gotty/pkg/mb64"
 )
 
 func TestInitialization(t *testing.T) {
@@ -76,7 +77,7 @@ func TestWriteFromSlaveCommand(t *testing.T) {
 
 	// Decode it and make sure it's intact
 	decoded := make([]byte, 1024)
-	n, err = base64.StdEncoding.Decode(decoded, buf[1:n])
+	n, err = mb64.StdEncoding.Decode(decoded, buf[1:n])
 	if err != nil {
 		t.Fatalf("Unexpected error from Decode(): %s", err)
 	}
