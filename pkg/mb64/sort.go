@@ -4,9 +4,9 @@ import (
 	"math"
 )
 
-var baseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+var sortBaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-func genCharMap(chars string) map[rune]int {
+func genSortCharMap(chars string) map[rune]int {
 	m := make(map[rune]int)
 	for i, c := range chars {
 		m[c] = i
@@ -30,7 +30,7 @@ func reverse(s string) string {
 	return string(runes)
 }
 
-var baseCharsMap = genCharMap(baseChars)
+var sortBaseCharsMap = genSortCharMap(sortBaseChars)
 
 func charsToNumbers(chars string) []int {
 	numbers := []int{}
@@ -38,7 +38,7 @@ func charsToNumbers(chars string) []int {
 		if c == '=' {
 			numbers = append(numbers, sum(numbers)%64)
 		} else {
-			numbers = append(numbers, baseCharsMap[c])
+			numbers = append(numbers, sortBaseCharsMap[c])
 		}
 	}
 	return numbers

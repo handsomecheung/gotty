@@ -4,12 +4,33 @@ package mb64
 import (
 	"encoding/base64"
 	"encoding/binary"
-	"fmt"
+	"errors"
 	"io"
-	"os"
 	"strconv"
 )
 
+func SetFont(font string) error {
+	if font == "" {
+		return errors.New("font not set")
+	}
+
+	b64 := base64.StdEncoding.EncodeToString([]byte(font))
+	numbers := charsToNumbers(b64)
+	NewEncoder := sortStr(sortBaseChars, numbers)
+	StdEncoding = NewEncoding(NewEncoder)
+
+	return nil
+}
+
+/*
+ * Encodings
+ */
+
+// An Encoding is a radix 64 encoding/decoding scheme, defined by a
+// 64-character alphabet. The most common encoding is the "base64"
+// encoding defined in RFC 4648 and used in MIME (RFC 2045) and PEM
+// (RFC 1421).  RFC 4648 also defines an alternate encoding, which is
+// the standard encoding with - and _ substituted for + and /.
 type Encoding struct {
 	encode    [64]byte
 	decodeMap [256]byte
@@ -22,24 +43,13 @@ const (
 	NoPadding  rune = -1  // No padding
 )
 
-var encodeStd = genEncodeStd(readKeyFromEnv())
+const encodeStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-func genEncodeStd(key string) string {
-	b64 := base64.StdEncoding.EncodeToString([]byte(key))
-	numbers := charsToNumbers(b64)
-	encodeStd := sortStr(baseChars, numbers)
-	fmt.Println("encodeStd: ", encodeStd)
-	return encodeStd
-}
-
-func readKeyFromEnv() string {
-	key := os.Getenv("MB64_KEY")
-	if key == "" {
-		panic("MB64_KEY is not set")
-	}
-	return key
-}
-
+// NewEncoding returns a new padded Encoding defined by the given alphabet,
+// which must be a 64-byte string that does not contain the padding character
+// or CR / LF ('\r', '\n').
+// The resulting Encoding uses the default padding character ('='),
+// which may be changed or disabled via WithPadding.
 func NewEncoding(encoder string) *Encoding {
 	if len(encoder) != 64 {
 		panic("encoding alphabet is not 64-bytes long")

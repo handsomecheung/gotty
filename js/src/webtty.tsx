@@ -1,28 +1,26 @@
-import { fromByteArray, toByteArray } from './mb64/encoding';
-
+import { fromByteArray, toByteArray } from "./mb64";
 
 export const protocols = ["webtty"];
 
-export const msgInputUnknown = '0';
-export const msgInput = '1';
-export const msgPing = '2';
-export const msgResizeTerminal = '3';
-export const msgSetEncoding = '4';
+export const msgInputUnknown = "0";
+export const msgInput = "1";
+export const msgPing = "2";
+export const msgResizeTerminal = "3";
+export const msgSetEncoding = "4";
 
-export const msgUnknownOutput = '0';
-export const msgOutput = '1';
-export const msgPong = '2';
-export const msgSetWindowTitle = '3';
-export const msgSetPreferences = '4';
-export const msgSetReconnect = '5';
-export const msgSetBufferSize = '6';
-
+export const msgUnknownOutput = "0";
+export const msgOutput = "1";
+export const msgPong = "2";
+export const msgSetWindowTitle = "3";
+export const msgSetPreferences = "4";
+export const msgSetReconnect = "5";
+export const msgSetBufferSize = "6";
 
 export interface Terminal {
     /*
      * Get dimensions of the terminal
      */
-    info(): { columns: number, rows: number };
+    info(): { columns: number; rows: number };
 
     /*
      * Process output from the server side
@@ -43,7 +41,6 @@ export interface Terminal {
      */
     removeMessage(): void;
 
-
     /*
      * Set window title
      */
@@ -53,7 +50,6 @@ export interface Terminal {
      * Set preferences. TODO: Add typings
      */
     setPreferences(value: object): void;
-
 
     /*
      * Sets an input (e.g. user types something) handler
@@ -129,16 +125,19 @@ export class WebTTY {
      */
     bufSize: number;
 
-    mb64BaseChars: string;
-
-    constructor(term: Terminal, connectionFactory: ConnectionFactory, args: string, authToken: string) {
+    constructor(
+        term: Terminal,
+        connectionFactory: ConnectionFactory,
+        args: string,
+        authToken: string,
+    ) {
         this.term = term;
         this.connectionFactory = connectionFactory;
         this.args = args;
         this.authToken = authToken;
         this.reconnect = -1;
         this.bufSize = 1024;
-    };
+    }
 
     open() {
         let connection = this.connectionFactory.create();
@@ -160,14 +159,12 @@ export class WebTTY {
 
                 this.sendSetEncoding("base64");
 
-                this.term.onInput(
-                    (input: string | Uint8Array) => {
-                        this.sendInput(input);
-                    }
-                );
+                this.term.onInput((input: string | Uint8Array) => {
+                    this.sendInput(input);
+                });
 
                 pingTimer = setInterval(() => {
-                    this.sendPing()
+                    this.sendPing();
                 }, 30 * 1000);
             });
 
@@ -188,7 +185,9 @@ export class WebTTY {
                         break;
                     case msgSetReconnect:
                         const autoReconnect = JSON.parse(payload);
-                        console.log("Enabling reconnect: " + autoReconnect + " seconds")
+                        console.log(
+                            "Enabling reconnect: " + autoReconnect + " seconds",
+                        );
                         this.reconnect = autoReconnect;
                         break;
                     case msgSetBufferSize:
@@ -212,22 +211,22 @@ export class WebTTY {
             });
 
             connection.open();
-        }
+        };
 
         setup();
         return () => {
             clearTimeout(reconnectTimeout);
             connection.close();
-        }
-    };
+        };
+    }
 
     private initializeConnection(args, authToken) {
-        this.connection.send(JSON.stringify(
-            {
+        this.connection.send(
+            JSON.stringify({
                 Arguments: args,
                 AuthToken: authToken,
-            }
-        ));
+            }),
+        );
     }
 
     /*
@@ -241,15 +240,20 @@ export class WebTTY {
         if (typeof input === "string") {
             dataString = input;
         } else {
-            dataString = String.fromCharCode(...input)
+            dataString = String.fromCharCode(...input);
         }
 
         // Account for base64 encoding
         let maxChunkSize = Math.floor(effectiveBufferSize / 4) * 3;
 
         for (let i = 0; i < Math.ceil(dataString.length / maxChunkSize); i++) {
-            let inputChunk = dataString.substring(i * maxChunkSize, Math.min((i + 1) * maxChunkSize, dataString.length))
-            this.connection.send(msgInput + fromByteArray(new TextEncoder().encode(inputChunk)));
+            let inputChunk = dataString.substring(
+                i * maxChunkSize,
+                Math.min((i + 1) * maxChunkSize, dataString.length),
+            );
+            this.connection.send(
+                msgInput + fromByteArray(new TextEncoder().encode(inputChunk)),
+            );
         }
     }
 
@@ -259,17 +263,15 @@ export class WebTTY {
 
     private sendResizeTerminal(colmuns: number, rows: number) {
         this.connection.send(
-            msgResizeTerminal + JSON.stringify(
-                {
+            msgResizeTerminal +
+                JSON.stringify({
                     columns: colmuns,
-                    rows: rows
-                }
-            )
+                    rows: rows,
+                }),
         );
     }
 
     private sendSetEncoding(encoding: "base64" | "null") {
-        this.connection.send(msgSetEncoding + encoding)
+        this.connection.send(msgSetEncoding + encoding);
     }
-
-};
+}

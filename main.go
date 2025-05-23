@@ -14,11 +14,17 @@ import (
 
 	"github.com/sorenisanerd/gotty/backend/localcommand"
 	"github.com/sorenisanerd/gotty/pkg/homedir"
+	"github.com/sorenisanerd/gotty/pkg/mb64"
 	"github.com/sorenisanerd/gotty/server"
 	"github.com/sorenisanerd/gotty/utils"
 )
 
 func main() {
+	mberr := mb64.SetFont(os.Getenv("MB64_KEY"))
+	if mberr != nil {
+		exit(mberr, 9)
+	}
+
 	app := cli.NewApp()
 	app.Name = "gotty"
 	app.Version = Version

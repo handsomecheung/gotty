@@ -18,7 +18,7 @@ gotty: main.go assets server/*.go webtty/*.go backend/*.go Makefile
 docker:
 	docker build . -t gotty-bash:$(VERSION)
 
-.PHONY: all docker assets
+.PHONY: all docker assets wasm
 assets: bindata/static/js/gotty.js.map \
 	bindata/static/js/gotty.js \
 	bindata/static/index.html \
@@ -28,20 +28,33 @@ assets: bindata/static/js/gotty.js.map \
 	bindata/static/css/xterm.css \
 	bindata/static/css/xterm_customize.css \
 	bindata/static/manifest.json \
-	bindata/static/icon_192.png
+	bindata/static/icon_192.png \
+	bindata/static/js/mb64.wasm \
+	bindata/static/js/wasm_exec.js
 
 all: gotty
 
 bindata/static bindata/static/css bindata/static/js:
 	mkdir -p $@
 
-bindata/static/%: resources/% | bindata/static/css 
+bindata/static/%: resources/% | bindata/static/css
 	cp "$<" "$@"
 
-bindata/static/css/%.css: resources/%.css | bindata/static 
+bindata/static/css/%.css: resources/%.css | bindata/static
 	cp "$<" "$@"
 
 bindata/static/css/xterm.css: js/node_modules/xterm/css/xterm.css | bindata/static
+	cp "$<" "$@"
+
+
+bindata/static/js/index.html: resources/index.html | bindata/static/js
+	cp "$<" "$@"
+
+# Copy WebAssembly files
+bindata/static/js/mb64.wasm: resources/mb64.wasm | bindata/static/js
+	cp "$<" "$@"
+
+bindata/static/js/wasm_exec.js: $(shell go env GOROOT)/misc/wasm/wasm_exec.js | bindata/static/js
 	cp "$<" "$@"
 
 js/node_modules/xterm/dist/xterm.css:
@@ -90,3 +103,7 @@ clean:
 addcontributors:
 	gh issue list -s all -L 1000 --json author -t "$$(echo '{{ range . }}{{ .author.login }}\n{{ end }}')" | sort | uniq | xargs -Ifoo all-contributors add foo bug --commitTemplate '<%= (newContributor ? "Add" : "Update") %> @<%= username %> as a contributor'
 	gh pr list -s all -L 1000 --json author -t "$$(echo '{{ range . }}{{ .author.login }}\n{{ end }}')" | sort | uniq | xargs -Ifoo all-contributors add foo code --commitTemplate '<%= (newContributor ? "Add" : "Update") %> @<%= username %> as a contributor'
+
+.PHONY: wasm
+wasm:
+	GOOS=js GOARCH=wasm go build -o resources/mb64.wasm ./cmd/mb64wasm
