@@ -147,7 +147,7 @@ func (wt *WebTTY) sendInitializeMessage() error {
 }
 
 func (wt *WebTTY) handleSlaveReadEvent(data []byte) error {
-	safeMessage := mb64.StdEncoding.EncodeToString(data)
+	safeMessage := mb64.RenderIn(data)
 	err := wt.masterWrite(append([]byte{Output}, []byte(safeMessage)...))
 	if err != nil {
 		return errors.Wrapf(err, "failed to send message to master")
@@ -183,13 +183,12 @@ func (wt *WebTTY) handleMasterReadEvent(data []byte) error {
 			return nil
 		}
 
-		var decodedBuffer = make([]byte, len(data))
-		n, err := wt.decoder.Decode(decodedBuffer, data[1:])
+		out, err := wt.decoder.RenderOut(data[1:])
 		if err != nil {
 			return errors.Wrapf(err, "failed to decode received data")
 		}
 
-		_, err = wt.slave.Write(decodedBuffer[:n])
+		_, err = wt.slave.Write(out)
 		if err != nil {
 			return errors.Wrapf(err, "failed to write received data to slave")
 		}
@@ -203,7 +202,7 @@ func (wt *WebTTY) handleMasterReadEvent(data []byte) error {
 	case SetEncoding:
 		switch string(data[1:]) {
 		case "base64":
-			wt.decoder = mb64.StdEncoding
+			wt.decoder = Base64Codec{}
 		case "null":
 			wt.decoder = NullCodec{}
 		}

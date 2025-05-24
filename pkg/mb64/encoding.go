@@ -2,25 +2,10 @@
 package mb64
 
 import (
-	"encoding/base64"
 	"encoding/binary"
-	"errors"
 	"io"
 	"strconv"
 )
-
-func SetFont(font string) error {
-	if font == "" {
-		return errors.New("font not set")
-	}
-
-	b64 := base64.StdEncoding.EncodeToString([]byte(font))
-	numbers := charsToNumbers(b64)
-	NewEncoder := sortStr(sortBaseChars, numbers)
-	StdEncoding = NewEncoding(NewEncoder)
-
-	return nil
-}
 
 /*
  * Encodings

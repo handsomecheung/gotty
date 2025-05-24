@@ -26,7 +26,7 @@ func RegisterWasmFunctions() {
 			return nil
 		}),
 
-		"encodeToString": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		"renderIn": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			if len(args) != 1 {
 				return js.ValueOf("error: expected 1 argument")
 			}
@@ -35,21 +35,17 @@ func RegisterWasmFunctions() {
 			input := make([]byte, args[0].Get("length").Int())
 			js.CopyBytesToGo(input, args[0])
 
-			// Encode using StdEncoding
-			encoded := mb64.StdEncoding.EncodeToString(input)
-			return js.ValueOf(encoded)
+			encoded := mb64.RenderIn(input)
+			return js.ValueOf(string(encoded))
 		}),
 
-		"decodeString": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		"renderOut": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			if len(args) != 1 {
 				return js.ValueOf("error: expected 1 argument")
 			}
 
-			// Get input string
 			input := args[0].String()
-
-			// Decode using StdEncoding
-			decoded, err := mb64.StdEncoding.DecodeString(input)
+			decoded, err := mb64.RenderOut([]byte(input))
 			if err != nil {
 				return js.ValueOf("error: " + err.Error())
 			}

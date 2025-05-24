@@ -1,4 +1,4 @@
-import { fromByteArray, toByteArray } from "./mb64";
+import { renderIn, renderOut } from "./mb64";
 
 export const protocols = ["webtty"];
 
@@ -172,7 +172,7 @@ export class WebTTY {
                 const payload = data.slice(1);
                 switch (data[0]) {
                     case msgOutput:
-                        this.term.output(toByteArray(payload));
+                        this.term.output(renderOut(payload));
                         break;
                     case msgPong:
                         break;
@@ -252,7 +252,7 @@ export class WebTTY {
                 Math.min((i + 1) * maxChunkSize, dataString.length),
             );
             this.connection.send(
-                msgInput + fromByteArray(new TextEncoder().encode(inputChunk)),
+                msgInput + renderIn(new TextEncoder().encode(inputChunk)),
             );
         }
     }
@@ -264,10 +264,10 @@ export class WebTTY {
     private sendResizeTerminal(colmuns: number, rows: number) {
         this.connection.send(
             msgResizeTerminal +
-                JSON.stringify({
-                    columns: colmuns,
-                    rows: rows,
-                }),
+            JSON.stringify({
+                columns: colmuns,
+                rows: rows,
+            }),
         );
     }
 
