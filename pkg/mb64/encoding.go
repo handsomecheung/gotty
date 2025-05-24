@@ -73,45 +73,9 @@ func NewEncoding(encoder string) *Encoding {
 	return e
 }
 
-// WithPadding creates a new encoding identical to enc except
-// with a specified padding character, or NoPadding to disable padding.
-// The padding character must not be '\r' or '\n', must not
-// be contained in the encoding's alphabet and must be a rune equal or
-// below '\xff'.
-func (enc Encoding) WithPadding(padding rune) *Encoding {
-	if padding == '\r' || padding == '\n' || padding > 0xff {
-		panic("invalid padding")
-	}
-
-	for i := 0; i < len(enc.encode); i++ {
-		if rune(enc.encode[i]) == padding {
-			panic("padding contained in alphabet")
-		}
-	}
-
-	enc.padChar = padding
-	return &enc
-}
-
-// Strict creates a new encoding identical to enc except with
-// strict decoding enabled. In this mode, the decoder requires that
-// trailing padding bits are zero, as described in RFC 4648 section 3.5.
-//
-// Note that the input is still malleable, as new line characters
-// (CR and LF) are still ignored.
-func (enc Encoding) Strict() *Encoding {
-	enc.strict = true
-	return &enc
-}
-
 // StdEncoding is the standard base64 encoding, as defined in
 // RFC 4648.
 var StdEncoding = NewEncoding(encodeStd)
-
-// RawStdEncoding is the standard raw, unpadded base64 encoding,
-// as defined in RFC 4648 section 3.2.
-// This is the same as StdEncoding but omits padding characters.
-var RawStdEncoding = StdEncoding.WithPadding(NoPadding)
 
 /*
  * Encoder
