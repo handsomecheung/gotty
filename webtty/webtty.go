@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/handsomecheung/mb64"
 	"github.com/pkg/errors"
-	"github.com/sorenisanerd/gotty/pkg/mb64"
 )
 
 // WebTTY bridges a PTY slave and its PTY master.
@@ -147,10 +147,14 @@ func (wt *WebTTY) sendInitializeMessage() error {
 }
 
 func (wt *WebTTY) handleSlaveReadEvent(data []byte) error {
-	safeMessage := mb64.RenderIn(data)
-	err := wt.masterWrite(append([]byte{Output}, []byte(safeMessage)...))
-	if err != nil {
-		return errors.Wrapf(err, "failed to send message to master")
+	safeMessage, err1 := mb64.Encode(data)
+	if err1 != nil {
+		return errors.Wrapf(err1, "failed to encode data")
+	}
+
+	err2 := wt.masterWrite(append([]byte{Output}, []byte(safeMessage)...))
+	if err2 != nil {
+		return errors.Wrapf(err2, "failed to send message to master")
 	}
 
 	return nil
@@ -183,7 +187,7 @@ func (wt *WebTTY) handleMasterReadEvent(data []byte) error {
 			return nil
 		}
 
-		out, err := wt.decoder.RenderOut(data[1:])
+		out, err := wt.decoder.Decode(data[1:])
 		if err != nil {
 			return errors.Wrapf(err, "failed to decode received data")
 		}

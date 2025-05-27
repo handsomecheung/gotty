@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/sorenisanerd/gotty/pkg/mb64"
+	"github.com/handsomecheung/mb64"
 )
 
 func (server *Server) wrapLogger(handler http.Handler) http.Handler {
@@ -34,7 +34,7 @@ func (server *Server) wrapBasicAuth(handler http.Handler, credential string) htt
 			return
 		}
 
-		payload, err := mb64.StdEncoding.DecodeString(token[1])
+		payload, err := mb64.Decode([]byte(token[1]))
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return

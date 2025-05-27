@@ -12,15 +12,15 @@ import (
 
 	cli "github.com/urfave/cli/v2"
 
+	"github.com/handsomecheung/mb64"
 	"github.com/sorenisanerd/gotty/backend/localcommand"
 	"github.com/sorenisanerd/gotty/pkg/homedir"
-	"github.com/sorenisanerd/gotty/pkg/mb64"
 	"github.com/sorenisanerd/gotty/server"
 	"github.com/sorenisanerd/gotty/utils"
 )
 
 func main() {
-	mberr := mb64.SetFont(os.Getenv("MB64_KEY"))
+	mberr := mb64.SetEncoding(os.Getenv("MB64_KEY"))
 	if mberr != nil {
 		exit(mberr, 9)
 	}

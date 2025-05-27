@@ -1,31 +1,31 @@
 package webtty
 
-import "github.com/sorenisanerd/gotty/pkg/mb64"
+import "github.com/handsomecheung/mb64"
 
 type Decoder interface {
-	RenderOut(src []byte) ([]byte, error)
+	Decode(src []byte) ([]byte, error)
 }
 
 type Encoder interface {
-	RenderIn(src []byte) ([]byte, error)
+	Encode(src []byte) ([]byte, error)
 }
 
 type NullCodec struct{}
 
-func (NullCodec) RenderIn(src []byte) []byte {
-	return src
+func (NullCodec) Encode(src []byte) ([]byte, error) {
+	return src, nil
 }
 
-func (NullCodec) RenderOut(src []byte) ([]byte, error) {
+func (NullCodec) Decode(src []byte) ([]byte, error) {
 	return src, nil
 }
 
 type Base64Codec struct{}
 
-func (Base64Codec) RenderIn(src []byte) []byte {
-	return mb64.RenderIn(src)
+func (Base64Codec) Encode(src []byte) ([]byte, error) {
+	return mb64.Encode(src)
 }
 
-func (Base64Codec) RenderOut(src []byte) ([]byte, error) {
-	return mb64.RenderOut(src)
+func (Base64Codec) Decode(src []byte) ([]byte, error) {
+	return mb64.Decode(src)
 }

@@ -6,7 +6,7 @@ package mb64wasm
 import (
 	"syscall/js"
 
-	"github.com/sorenisanerd/gotty/pkg/mb64"
+	"github.com/handsomecheung/mb64"
 )
 
 // RegisterWasmFunctions registers the mb64 encoding/decoding functions to the global JavaScript object
@@ -18,7 +18,7 @@ func RegisterWasmFunctions() {
 			}
 
 			input := args[0].String()
-			err := mb64.SetFont(input)
+			err := mb64.SetEncoding(input)
 			if err != nil {
 				return js.ValueOf("error: " + err.Error())
 			}
@@ -35,7 +35,10 @@ func RegisterWasmFunctions() {
 			input := make([]byte, args[0].Get("length").Int())
 			js.CopyBytesToGo(input, args[0])
 
-			encoded := mb64.RenderIn(input)
+			encoded, err := mb64.Encode(input)
+			if err != nil {
+				return js.ValueOf("error: " + err.Error())
+			}
 			return js.ValueOf(string(encoded))
 		}),
 
@@ -45,7 +48,7 @@ func RegisterWasmFunctions() {
 			}
 
 			input := args[0].String()
-			decoded, err := mb64.RenderOut([]byte(input))
+			decoded, err := mb64.Decode([]byte(input))
 			if err != nil {
 				return js.ValueOf("error: " + err.Error())
 			}
