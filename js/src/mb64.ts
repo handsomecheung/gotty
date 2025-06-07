@@ -4,6 +4,7 @@ declare global {
   interface Window {
     mb64: {
       setFont(str: string): string;
+      setFontSize(str: string): string;
       renderIn(data: Uint8Array): string;
       renderOut(str: string): Uint8Array;
     };
@@ -13,10 +14,14 @@ declare global {
 
 function checkInitialization() {
   if (!window.mb64Initialized) {
-    throw new Error("mb64 WebAssembly module is not initialized yet. Please wait for initialization to complete.");
+    throw new Error(
+      "mb64 WebAssembly module is not initialized yet. Please wait for initialization to complete.",
+    );
   }
   if (!window.mb64) {
-    throw new Error("mb64 WebAssembly module failed to register its functions. Please check the browser console for errors.");
+    throw new Error(
+      "mb64 WebAssembly module failed to register its functions. Please check the browser console for errors.",
+    );
   }
 }
 
@@ -29,6 +34,18 @@ export function setFont(font: string): string {
   } catch (err) {
     console.error("Error in setFont:", err);
     throw new Error(`failed to set font: ${err.message}`);
+  }
+}
+
+export function setFontSize(size: string): string {
+  checkInitialization();
+  try {
+    const err = window.mb64.setFontSize(size);
+    console.log("set fontSize, error: ", err);
+    return err;
+  } catch (err) {
+    console.error("Error in setFontSize:", err);
+    throw new Error(`failed to set font size: ${err.message}`);
   }
 }
 

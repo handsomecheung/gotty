@@ -25,6 +25,12 @@ func main() {
 		exit(mberr, 9)
 	}
 
+	doBypass := os.Getenv("MB64_BYPASS")
+	if doBypass != "" {
+		fmt.Println("WARNING!!! Bypassing mb64")
+		mb64.Bypass()
+	}
+
 	app := cli.NewApp()
 	app.Name = "gotty"
 	app.Version = Version

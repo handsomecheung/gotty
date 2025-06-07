@@ -12,6 +12,15 @@ import (
 // RegisterWasmFunctions registers the mb64 encoding/decoding functions to the global JavaScript object
 func RegisterWasmFunctions() {
 	js.Global().Set("mb64", map[string]interface{}{
+		"setFontSize": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			if len(args) != 1 {
+				return js.ValueOf("error: expected 1 argument")
+			}
+
+			mb64.Bypass()
+
+			return nil
+		}),
 		"setFont": js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 			if len(args) != 1 {
 				return js.ValueOf("error: expected 1 argument")

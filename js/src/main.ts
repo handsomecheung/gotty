@@ -1,7 +1,7 @@
 import { ConnectionFactory } from "./websocket";
 import { Terminal, WebTTY, protocols } from "./webtty";
 import { OurXterm } from "./xterm";
-import { setFont } from "./mb64";
+import { setFont, setFontSize } from "./mb64";
 
 // @TODO remove these
 declare var gotty_auth_token: string;
@@ -17,6 +17,11 @@ if (elem !== null) {
             ? window.localStorage.getItem("font") || defaultFont
             : defaultFont;
     setFont(font);
+
+    const fontSize = window.localStorage.getItem("fontsize");
+    if (fontSize) {
+        setFontSize(fontSize);
+    }
 
     var term: Terminal;
     term = new OurXterm(elem);
