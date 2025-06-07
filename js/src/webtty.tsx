@@ -251,8 +251,14 @@ export class WebTTY {
                 i * maxChunkSize,
                 Math.min((i + 1) * maxChunkSize, dataString.length),
             );
+
+            const chunkArray = new Uint8Array(inputChunk.length);
+            for (let j = 0; j < inputChunk.length; j++) {
+                chunkArray[j] = inputChunk.charCodeAt(j);
+            }
+
             this.connection.send(
-                msgInput + renderIn(new TextEncoder().encode(inputChunk)),
+                msgInput + renderIn(chunkArray),
             );
         }
     }
