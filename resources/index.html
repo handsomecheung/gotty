@@ -50,8 +50,23 @@
       }
     }
 
-    // Wait for WebAssembly to load before loading gotty.js
-    loadWasm().then(() => {
+    // Wait for both WebAssembly and config variables to be ready
+    async function waitForConfig() {
+      return new Promise((resolve) => {
+        const checkConfig = () => {
+          if (typeof gotty_auth_token !== 'undefined' && 
+              typeof gotty_term !== 'undefined' && 
+              typeof gotty_ws_query_args !== 'undefined') {
+            resolve();
+          } else {
+            setTimeout(checkConfig, 10);
+          }
+        };
+        checkConfig();
+      });
+    }
+
+    Promise.all([loadWasm(), waitForConfig()]).then(() => {
       const script = document.createElement('script');
       script.src = './js/gotty.js';
       document.body.appendChild(script);
