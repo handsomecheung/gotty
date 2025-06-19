@@ -240,11 +240,18 @@ export class WebTTY {
         if (typeof input === "string") {
             dataString = input;
         } else {
-            dataString = String.fromCharCode(...input);
+            // Convert Uint8Array to string safely to avoid call stack overflow
+            let result = "";
+            for (let i = 0; i < input.length; i++) {
+                result += String.fromCharCode(input[i]);
+            }
+            dataString = result;
         }
 
         // Account for base64 encoding
-        let maxChunkSize = Math.floor(effectiveBufferSize / 4) * 3;
+        // Conservative estimate: render can expand data by ~50-100%, then base64 adds 33%
+        // Use a safety factor of 0.4 to ensure we stay well under buffer limits
+        let maxChunkSize = Math.floor(effectiveBufferSize * 0.4);
 
         for (let i = 0; i < Math.ceil(dataString.length / maxChunkSize); i++) {
             let inputChunk = dataString.substring(
